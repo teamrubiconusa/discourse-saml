@@ -20,6 +20,7 @@ class SamlAuthenticator < ::Auth::OAuth2Authenticator
                       :idp_sso_target_url => GlobalSetting.saml_target_url,
                       :idp_cert_fingerprint => GlobalSetting.try(:saml_cert_fingerprint),
                       :idp_cert => GlobalSetting.try(:saml_cert),
+                      :name_identifier_format => "urn:oasis:names:tc:SAML:1.1:nameid-format:emailAddress",
                       :attribute_statements => { :nickname => ['screenName'] },
                       :assertion_consumer_service_url => Discourse.base_url + "/auth/saml/callback",
                       :custom_url => (GlobalSetting.try(:saml_request_method) == 'post') ? "/discourse_saml" : nil
@@ -46,6 +47,9 @@ class SamlAuthenticator < ::Auth::OAuth2Authenticator
     end
 
     result.email = auth[:info].email || uid
+    if auth.extra.present? && auth.extra[:raw_info].present?
+      result.email = auth.extra[:raw_info].attributes['screenName']
+    end
     result.email_valid = true
 
     if result.respond_to?(:skip_email_validation) && GlobalSetting.try(:saml_skip_email_validation)
