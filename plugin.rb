@@ -48,7 +48,7 @@ class SamlAuthenticator < ::Auth::OAuth2Authenticator
 
     result.email = auth[:info].email || uid
     if auth.extra.present? && auth.extra[:raw_info].present?
-      result.email = auth.extra[:raw_info].attributes['screenName']
+      result.email = auth.extra[:raw_info].attributes['screenName'].to_s
     end
     result.email_valid = true
 
